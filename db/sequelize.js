@@ -16,7 +16,7 @@ await ensureDatabaseExists();
 export const sequelize = new SQ.Sequelize(database, user, password, {
     host,
     port,
-    dialect: 'mysql',
+    dialect: 'mariadb',
     logging: false,
     timezone: 'Asia/Seoul',
 });
