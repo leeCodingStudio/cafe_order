@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>제조대</title>
+</head>
+<body>
+    <h1>📋 주문 목록</h1>
+    <ul id="order-list">
+        <% orders.forEach(order => { %>
+            <li id="order-<%= order.id %>">
+                <strong>주문번호 <%= order.id %></strong>
+                <ul>
+                    <% order.menuList.forEach(item => { %>
+                        <li><%= item.menu %> - <%= item.qty %>개</li>
+                    <% }) %>
+                </ul>
+                <button onclick="completeOrder(<%= order.id %>)">주문 완료</button>
+            </li>
+        <% }) %>
+    </ul>
+
+    <script>
+        const socket = new WebSocket(`ws://${location.host}`);
+
+        socket.onmessage = (event) => {
+            const msg = JSON.parse(event.data);
+            if (msg.type === 'newOrder') renderOrder(msg.data);
+            if (msg.type === 'orderCompleted') {
+                document.getElementById(`order-${msg.data.id}`)?.remove();
+            }
+        };
+
+        function renderOrder(order) {
+            const list = document.getElementById('order-list');
+            const li = document.createElement('li');
+            li.id = `order-${order.id}`;
+            li.innerHTML = `
+                <strong>주문번호 ${order.id}</strong>
+                <ul>
+                    ${order.menuList.map(item => `<li>${item.menu} - ${item.qty}개</li>`).join('')}
+                </ul>
+                <button onclick="completeOrder(${order.id})">주문 완료</button>
+            `;
+            list.prepend(li);
+        }
+
+        async function completeOrder(id) {
+            const res = await fetch(`/order/${id}/done`, { method: 'PATCH' });
+            if (res.ok) {
+                document.getElementById(`order-${id}`)?.remove();
+            } else {
+                alert('완료 처리 실패');
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>주문 입력</title>
+</head>
+<body>
+    <h1>🧾 주문 입력</h1>
+    <form id="order-form">
+        <label>메뉴명: <input type="text" name="menu"></label>
+        <label>수량: <input type="number" name="qty" value="1"></label>
+        <button type="button" onclick="addItem()">메뉴 추가</button>
+
+        <ul id="menu-list"></ul>
+        <button type="submit">주문하기</button>
+    </form>
+
+    <script>
+        const menuList = [];
+
+        function addItem() {
+            const menu = document.querySelector('input[name="menu"]').value;
+            const qty = parseInt(document.querySelector('input[name="qty"]').value);
+            if (menu && qty > 0) {
+                menuList.push({ menu, qty });
+                renderList();
+            }
+        }
+
+        function renderList() {
+            const list = document.getElementById('menu-list');
+            list.innerHTML = '';
+            menuList.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = `${item.menu} - ${item.qty}개`;
+                list.appendChild(li);
+            });
+        }
+
+        document.getElementById('order-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const res = await fetch('/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ menuList })
+            });
+            const data = await res.json();
+            alert(`주문 완료! 주문번호: ${data.id}`);
+            window.location.reload();
+        });
+    </script>
+</body>
+</html>
