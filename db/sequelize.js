@@ -11,8 +11,6 @@ const ensureDatabaseExists = async () => {
     await connection.end();
 };
 
-await ensureDatabaseExists();
-
 export const sequelize = new SQ.Sequelize(database, user, password, {
     host,
     port,
